@@ -24,9 +24,9 @@ jobs:
           path: |
             ~/.buildozer
             .buildozer
-          key: buildozer-sdk33-${{ runner.os }}-${{ hashFiles('buildozer.spec', 'main.py') }}
+          key: buildozer-sdk33-v2-${{ runner.os }}-${{ hashFiles('buildozer.spec', 'main.py') }}
           restore-keys: |
-            buildozer-sdk33-${{ runner.os }}-
+            buildozer-sdk33-v2-${{ runner.os }}-
 
       - name: Install system dependencies
         run: |
