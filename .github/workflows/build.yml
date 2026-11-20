@@ -11,22 +11,22 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
       - name: Cache Buildozer & Android SDK/NDK
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.buildozer
             .buildozer
-          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec', 'main.py') }}
+          key: buildozer-sdk33-${{ runner.os }}-${{ hashFiles('buildozer.spec', 'main.py') }}
           restore-keys: |
-            buildozer-${{ runner.os }}-
+            buildozer-sdk33-${{ runner.os }}-
 
       - name: Install system dependencies
         run: |
@@ -48,10 +48,10 @@ jobs:
         env:
           BUILDOZER_ALLOW_ROOT: "1"
         run: |
-          buildozer -v android debug
+          yes | buildozer -v android debug
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dollarstar-barcode-apk
           path: bin/*.apk
