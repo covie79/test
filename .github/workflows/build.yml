@@ -24,9 +24,9 @@ jobs:
           path: |
             ~/.buildozer
             .buildozer
-          key: buildozer-sdk33-v3-${{ runner.os }}-${{ hashFiles('buildozer.spec', 'main.py') }}
+          key: buildozer-sdk-fix-${{ runner.os }}-${{ hashFiles('buildozer.spec', 'main.py') }}
           restore-keys: |
-            buildozer-sdk33-v3-${{ runner.os }}-
+            buildozer-sdk-fix-${{ runner.os }}-
 
       - name: Install system dependencies
         run: |
@@ -44,20 +44,20 @@ jobs:
           python3 -m pip install --upgrade pip setuptools wheel
           pip install --upgrade buildozer cython==0.29.36 virtualenv
 
-      - name: Pre-accept Android SDK licenses
-        env:
-          BUILDOZER_ALLOW_ROOT: "1"
+      - name: Prepare Android SDK licenses and sdkmanager path
         run: |
           mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-          buildozer android update || true
-          SDKMANAGER=$(find ~/.buildozer/android/platform/android-sdk -name "sdkmanager" -type f 2>/dev/null | head -n 1)
-          if [ -n "$SDKMANAGER" ]; then
-            (yes || true) | "$SDKMANAGER" --sdk_root="$HOME/.buildozer/android/platform/android-sdk" --licenses || true
+          cp -rn /usr/local/lib/android/sdk/licenses/* ~/.buildozer/android/platform/android-sdk/licenses/ 2>/dev/null || true
+          if [ -d "/usr/local/lib/android/sdk/cmdline-tools/latest/bin" ]; then
+            export PATH="/usr/local/lib/android/sdk/cmdline-tools/latest/bin:$PATH"
+            yes | sdkmanager --sdk_root="$HOME/.buildozer/android/platform/android-sdk" "platforms;android-33" "build-tools;33.0.2" || true
           fi
 
       - name: Build APK with Buildozer
         env:
           BUILDOZER_ALLOW_ROOT: "1"
+          ANDROID_SDK_ROOT: "/home/runner/.buildozer/android/platform/android-sdk"
+          PATH: "/home/runner/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin:/home/runner/.buildozer/android/platform/android-sdk/platform-tools:/usr/local/lib/android/sdk/cmdline-tools/latest/bin:/usr/local/lib/android/sdk/platform-tools:/opt/hostedtoolcache/Python/3.11.18/x64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
         run: |
           buildozer -v android debug
 
