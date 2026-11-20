@@ -24,9 +24,9 @@ jobs:
           path: |
             ~/.buildozer
             .buildozer
-          key: buildozer-sdk33-v2-${{ runner.os }}-${{ hashFiles('buildozer.spec', 'main.py') }}
+          key: buildozer-sdk33-v3-${{ runner.os }}-${{ hashFiles('buildozer.spec', 'main.py') }}
           restore-keys: |
-            buildozer-sdk33-v2-${{ runner.os }}-
+            buildozer-sdk33-v3-${{ runner.os }}-
 
       - name: Install system dependencies
         run: |
@@ -43,6 +43,17 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
           pip install --upgrade buildozer cython==0.29.36 virtualenv
+
+      - name: Pre-accept Android SDK licenses
+        env:
+          BUILDOZER_ALLOW_ROOT: "1"
+        run: |
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          buildozer android update || true
+          SDKMANAGER=$(find ~/.buildozer/android/platform/android-sdk -name "sdkmanager" -type f 2>/dev/null | head -n 1)
+          if [ -n "$SDKMANAGER" ]; then
+            (yes || true) | "$SDKMANAGER" --sdk_root="$HOME/.buildozer/android/platform/android-sdk" --licenses || true
+          fi
 
       - name: Build APK with Buildozer
         env:
